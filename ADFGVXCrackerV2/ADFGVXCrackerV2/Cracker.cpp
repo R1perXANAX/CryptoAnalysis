@@ -103,6 +103,59 @@ std::string Cracker::rearrange_text()
     return result;
 }
 
+std::string Cracker::substitute(const std::string& ciphered, const std::vector<std::pair<std::string, char>>& bimap) {
+    std::map<std::string, char> substitution_map;
+
+    for (const auto& pair : bimap) {
+        substitution_map[pair.first] = pair.second;
+    }
+
+    std::string decrypted_text;
+    for (size_t i = 0; i < ciphered.length(); i += 2) {
+        std::string bigram = ciphered.substr(i, 2);
+
+        auto it = substitution_map.find(bigram);
+        if (it != substitution_map.end()) {
+            if (it->second != '!') {
+                decrypted_text += it->second;
+            }
+            else {
+                decrypted_text += bigram;
+            }
+        }
+        else {
+            decrypted_text += '?';
+        }
+    }
+
+    return decrypted_text;
+}
+
+std::vector<std::pair<std::string, double>> Cracker::calc_bifreq(const std::string& text)
+{
+    std::map<std::string, double> frequency_map;
+
+    for (size_t i = 0; i < text.length() - 1; i += 2) {
+        std::string bigram = text.substr(i, 2);
+        frequency_map[bigram]++;
+    }
+
+    auto size = text.length() / 2;
+    for (auto& pair : frequency_map) {
+        pair.second = pair.second / size;
+    }
+
+    std::vector<std::pair<std::string, double>> sorted_frequencies(frequency_map.begin(), frequency_map.end());
+
+    std::sort(sorted_frequencies.begin(), sorted_frequencies.end(),
+        [](const std::pair<std::string, double>& a, const std::pair<std::string, double>& b) {
+            return a.second > b.second;
+        }
+    );
+
+    return sorted_frequencies;
+}
+
 void print_ic_results()
 {
     auto best_ics = Cracker::get_ics();
@@ -119,3 +172,4 @@ void print_ic_results()
     }
         
 }
+
