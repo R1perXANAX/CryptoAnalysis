@@ -34,12 +34,15 @@ private:
     
     static std::mutex mutex;
     static std::vector<std::pair<double, info>> best_ics;
+    static std::vector<std::pair<std::string, double>> letter_frequencies;
+
 private:
 
-    void do_work();
-    double calculate_ic(const std::string& text);
-    std::string rearrange_text();
-
+    void                                                            do_work();
+    double                                                          calculate_ic(const std::string& text);
+    std::string                                                     rearrange_text();
+    
+    
 public:
     Cracker(std::string& ciphered_text, int key_lenght) {
         t_count++;
@@ -58,7 +61,7 @@ public:
         t_count--;
     }
 
-    __inline static std::vector<std::pair<double, info>> get_ics() {
+    __inline static std::vector<std::pair<double, info>>            get_ics() {
         std::lock_guard<std::mutex> lock(mutex);
         return best_ics;
     }
@@ -67,5 +70,11 @@ public:
         if (m_running_thread.joinable())
             m_running_thread.join();
     }
-};
 
+    static std::vector<std::pair<std::string, double>>              calc_bifreq(const std::string& text);
+    static std::string                                              substitute(const std::string& ciphered, const std::vector<std::pair<std::string, char>>& bimap);
+
+    __inline static std::vector<std::pair<std::string, double>>& get_words_freq() {
+        return letter_frequencies;
+    }
+};
