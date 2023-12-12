@@ -73,9 +73,9 @@ public class Utils {
         }
     }
 
-    public static void generatePermutationsForNumber(int n, List<List<Integer>> allPermutations) {
+    public static void generatePermutationsForNumber(int n, List<List<Integer>> allPermutations) { // genera lista di tutte le possibili permutazioni di un testo di lunghezza n
         List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) { // fill the list with numbers from 0 to n-1
             list.add(i);
         }
         generatePermutations(list, n, allPermutations);
@@ -104,27 +104,34 @@ public class Utils {
         return ic;
 	}
 
-	public static String rearrangeText(String cipheredText, List<Integer> permutation) {
+	public static String rearrangeText(String cipheredText, List<Integer> permutation) { // rearrange the text according to the permutation
 
 
 		StringBuilder textCpy = new StringBuilder(cipheredText);
 
-        int extraChars = textCpy.length() % permutation.size();
-        int emptySpace = (extraChars == 0) ? 0 : (permutation.size() - extraChars);
-        int columnSize = textCpy.length() / permutation.size();
+        // number of columns with an extra character (because the text length is not a multiple of the key length)
+        int extraChars = textCpy.length() % permutation.size(); 
 
+        // number of empty spaces to insert
+        int emptySpace = (extraChars == 0) ? 0 : (permutation.size() - extraChars);
+
+        // number of characters in each column
+        int columnSize = textCpy.length() / permutation.size(); 
+
+        // creation of the lists that will contain the two columns
 		List<Integer> firstColumn = new ArrayList<>();
         List<Integer> lastColumn = new ArrayList<>();
 
-        for (int i = 0; i < permutation.size(); i++) {
-            if (i < permutation.size() - emptySpace)
+        // filling the two columns: the first one will have columnSize+1 characters, the second one will have columnSize characters
+        for (int i = 0; i < permutation.size(); i++) { 
+            if (i < permutation.size() - emptySpace) // if column has one more character
                 firstColumn.add(permutation.get(i));
-            else
-                lastColumn.add(permutation.get(i));
+            else                                // if column has a character less
+                lastColumn.add(permutation.get(i)); 
         }
 
 		int i = 0, step, currPos = 0;
-
+        // filling the text with empty spaces
         while (currPos < textCpy.length()) {
             if (firstColumn.contains(i)) {
                 step = columnSize + 1;
@@ -146,12 +153,14 @@ public class Utils {
             columnMap.add(textCpy.substring(start, start + columnSize+extraChar));
         }
 
-        // Reconstructing the result
+        // Reconstructing the result: concatenating the columns in the right order
         StringBuilder result = new StringBuilder();
-        for (int x = 0; x < columnMap.get(0).length(); x++) {
-            for (int y = 0; y < permutation.size(); y++) {
+        
+        // add the characters to the result string, column by column, just if 
+        for (int x = 0; x < columnMap.get(0).length(); x++) { 
+            for (int y = 0; y < permutation.size(); y++) { 
                 char charToAdd = columnMap.get(y).charAt(x);
-                if (charToAdd != ' ') {
+                if (charToAdd != ' ') { 
                     result.append(charToAdd);
                 }
             }
