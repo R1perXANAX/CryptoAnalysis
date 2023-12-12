@@ -1,5 +1,5 @@
 #include <iostream>
-#include <conio.h>  
+#include <cctype>
 #include "Cracker.h"
 #include "Cipher.h"
 
@@ -29,109 +29,112 @@ int main()
 	Cracker c4(text, 9);
 	Cracker c5(text, 10);
 
-	char key;
-	std::cout << "\nPress enter to print ics, q to quit\n" << std::endl;
+    while (true) {
+        std::cout << "Press Enter to continue or 'q' to quit." << std::endl;
 
-	while (true) {
+        char key = std::cin.get();
 
-		while (true) {
-			key = _getch();  // Waits and gets the next character from the keyboard
+        if (key == 'q') {
+            break;
+        }
+        else if (key == '\n') {
+            auto ics = Cracker::get_ics();
+            for (short i = 0; i < ics.size(); i++) {
+                std::cout << "[" << i << "] -> IC: " << ics[i].first << " " << "Permutation Lenght: "<< ics[i].second._permutation.size() << "-> { ";
+                for (short j = 0; j < ics[i].second._permutation.size(); j++) {
+                    std::cout << ics[i].second._permutation[j] << " ";
+                }
+                std::cout << "}" << std::endl;
+            }
 
-			if (key == '\r') {  // '\r' is the carriage return, usually Enter key
-				auto ics = Cracker::get_ics();
-				for (short i = 0; i < ics.size(); i++) {
-					std::cout << "[" << i << "] -> IC: " << ics[i].first << std::endl;
-				}
+            std::cout << "Select a number: ";
+            int selected;
+            if (std::cin >> selected) {
+                if (selected < 0 || selected >= ics.size()) {
+                    std::cout << "Invalid number" << std::endl;
+                }
+                else {
+                    std::cout << "[+] Applying substitution based on frequency" << std::endl;
+                    auto ciphered_freq = Cracker::calc_bifreq(ics[selected].second.text);
+                    auto words_freq = Cracker::get_words_freq();
 
-				std::cout << "Select a number" << std::endl;
+                    std::vector<std::pair<std::string, char>> substitution;
+                    substitution.reserve(ciphered_freq.size());
 
-				key = _getch();
+                    for (int i = 0; i < ciphered_freq.size(); i++) {
+                        std::pair<std::string, char> pair;
 
-				if (key >= '0' && key <= '9') {
-					if ((key - '0') >= ics.size()) {
-						std::cout << "Invalid number" << std::endl;
-					}
-					else
-					{
-						
-						std::cout << "[+]Applying substitution based on frequency" << std::endl;
-						auto ciphered_freq = Cracker::calc_bifreq(ics[(key - '0')].second.text);
-						auto words_freq = Cracker::get_words_freq();
+                        if (i < words_freq.size()) {
+                            pair.first = ciphered_freq[i].first;
+                            pair.second = words_freq[i].first[0];
+                        }
+                        else {
+                            pair.first = ciphered_freq[i].first;
+                            pair.second = '!';
+                        }
 
-						std::vector<std::pair<std::string, char>> substitution;
-						substitution.reserve(ciphered_freq.size());
+                        substitution.push_back(pair);
+                    }
 
-						for (int i = 0; i < ciphered_freq.size(); i++) {
-							std::pair<std::string, char> pair;
+                    auto ciphered = ics[selected].second.text;
 
-							if (i < words_freq.size()) {
-								pair.first = ciphered_freq[i].first;
-								pair.second = words_freq[i].first[0];
-							}
-							else {
-								pair.first = ciphered_freq[i].first;
-								pair.second = '!';
-							}
+                    std::cout << "\n\nCiphered text: " << ciphered << std::endl;
+                    std::cout << "\nSubstitution:" << Cracker::substitute(ciphered, substitution) << std::endl;
 
-							substitution.push_back(pair);
-						}
+                    std::cout << "Substitution map: \n" << std::endl;
+                    for (auto& i : substitution) {
+                        std::cout << i.first << ":" << i.second << std::endl;
+                    }
 
-						auto ciphered = ics[(key - '0')].second.text;
+                    std::cout << "Do you want to change association? Y/N" << std::endl;
+                    std::cin.ignore(); // Ignore newline left in the buffer
+                    std::cin.get(key);
 
-						std::cout << "\n\nCiphered text: " << ciphered << std::endl;
-						std::cout << "\nSubstitution:" << Cracker::substitute(ciphered, substitution) << std::endl;
+                    while (tolower(key) == 'y') {
+                        std::string bigram;
+                        char new_char;
 
-						std::cout << "Substitution map: \n" << std::endl;
-						for (auto& i : substitution) {
-							std::cout << i.first << ":" << i.second << std::endl;
-						}
+                        // Get user input for the bigram they want to change
+                        std::cout << "Enter the bigram to change: ";
+                        std::cin >> bigram;
 
-						std::cout << "Do you want to change association? Y/N" << std::endl;
-						key = _getch();
+                        // Get user input for the new character
+                        std::cout << "Enter the new character for " << bigram << ": ";
+                        std::cin >> new_char;
 
-						while (tolower(key) == 'y') {
-							std::string bigram;
-							char new_char;
+                        // Update the substitution map
+                        for (auto& pair : substitution) {
+                            if (pair.first == bigram) {
+                                pair.second = new_char;
+                                break; // Break if we've found and updated the bigram
+                            }
+                        }
 
-							// Get user input for the bigram they want to change
-							std::cout << "Enter the bigram to change: ";
-							std::cin >> bigram;
+                        // Optional: Show the updated substitution map
+                        std::cout << "Updated substitution map: \n";
+                        for (auto& i : substitution) {
+                            std::cout << i.first << ":" << i.second << std::endl;
+                        }
 
-							// Get user input for the new character
-							std::cout << "Enter the new character for " << bigram << ": ";
-							std::cin >> new_char;
+                        // Ask if the user wants to make more changes
+                        std::cout << "Do you want to make another change? Y/N" << std::endl;
+                        std::cin.ignore(); // Ignore newline left in the buffer
+                        std::cin.get(key);
+                    }
 
-							// Update the substitution map
-							for (auto& pair : substitution) {
-								if (pair.first == bigram) {
-									pair.second = new_char;
-									break; // Break if we've found and updated the bigram
-								}
-							}
+                    std::cout << "\nSubstitution:" << Cracker::substitute(ciphered, substitution) << std::endl;
+                }
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+                std::cin.clear(); // Clear the error flag
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore the rest of the line
+            }
+        }
 
-							// Optional: Show the updated substitution map
-							std::cout << "Updated substitution map: \n";
-							for (auto& i : substitution) {
-								std::cout << i.first << ":" << i.second << std::endl;
-							}
-
-							// Ask if the user wants to make more changes
-							std::cout << "Do you want to make another change? Y/N" << std::endl;
-							key = _getch();
-						}
-
-						std::cout << "\nSubstitution:" << Cracker::substitute(ciphered, substitution) << std::endl;
-					}
-
-					
-				}
-			}
-			else if (key == 'q') {  // Exit the loop if 'q' is pressed
-				break;
-			}
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(300));
-	}
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+    return 0;
 }
+
 
