@@ -2,4 +2,4 @@
 !.gitignore
 !*.cpp
 !*.h
-!CmakeLists.txt
+!CMakeLists.txt
