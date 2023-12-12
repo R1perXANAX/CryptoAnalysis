@@ -35,7 +35,8 @@ public class Executer implements Runnable{
                 IC = Utils.calculateIC(deciphered);  // I calculate the IC of the deciphered text
 
                 if(IC >= 0.06){
-                    System.out.println("\n[+]KEY FOUND:" +foundKey+", IC:" +IC);
+                    System.out.println("\n[+]COLUMN TRANSPOSITION KEY FOUND:" + permutation.toString());
+                    System.out.println("\n[+]VIGENERE KEY FOUND:" +foundKey+", IC:" +IC);
                     System.out.println("[+]PLAIN TEXT: \n"+deciphered);
                 }
             }
