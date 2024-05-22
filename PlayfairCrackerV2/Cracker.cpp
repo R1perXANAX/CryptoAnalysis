@@ -1,7 +1,3 @@
-//
-// Created by Irene Erba on 12/12/23.
-//
-
 #include "Cracker.h"
 #include <cmath>
 
