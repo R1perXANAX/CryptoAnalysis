@@ -1,7 +1,3 @@
-//
-// Created by Irene Erba on 12/12/23.
-//
-
 #ifndef NUOVOPLAYFAIR_CRACKER_H
 #define NUOVOPLAYFAIR_CRACKER_H
 #include <iostream>
